@@ -9,4 +9,6 @@ All the usecases for data mining :
 2) Pull Linkedin data in a streaming fashion
 
 3) Mine the google place data using a MR program
+
+4) Recommendation Engine data mining
 - 
