@@ -17,8 +17,20 @@ Current Status :
 
 Future Plan :
  - continuously pull data from linkedin using a scheduler
+ - view the product ratings in comparison chart using D3 
+ 
 3) Mine the google place data using a MR program
- - 
+
+Current Status :
+ - Categorize the places per category per rating
+   ~ 
+ - front end code 
+   ~ 
+
+Future Plan :
+ - Add Search Textbox with various Filtering options : Radius, Rating, 
+ - Host it in a webserver
+ - port it as Android App
 
 4) Recommendation Engine data mining
   -
