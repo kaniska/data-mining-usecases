@@ -1,18 +1,17 @@
 IBM
-GE
+Acer
+CA 
+Apple
+BlackBerry
+EMC
+Fujitsu
+Google
+Lenovo
+Microsoft 
+Barracuda
+SunGard
 Hewlett-Packard
-Oracle
-Accenture
-Microsoft
-Deloitte
-Alcatel-Lucent
 Cisco
-EY
 Dell
 SAP
-Bank of America
-Infosys
-Wipro
-Lockheed Martin
-McKinsey & Company
-Goldman Sachs
+Hitachi
