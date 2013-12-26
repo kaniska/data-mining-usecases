@@ -38,3 +38,5 @@ Future Plan :
 5) Mine the log data and query in real-time using MongoDB
  ~ monitor the datasource for new data and push them into MongoDB staging collection
  
+6) Mine Events data for Event Recommendation
+ ~ Ref : https://github.com/analyticsUfcg/recEventos/blob/master/src/rCode/sprint_4/data_summary_3.R
