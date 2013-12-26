@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>D3 Page Template</title>
+<script type="text/javascript" src="d3/d3.v3.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<p>If I were to ask you, as a mere paragraph, would you say that
+		I have style?		
+		</p>
+		<p class=highlight>
+		Lets highlight these words !
+		</p>
+		
+		<svg width="50" height="50">
+		<circle cx="25" cy="25" r="22" class="pumpkin"/>
+		</svg>
+		<text x="250" y="25" font-family="serif" font-size="25"
+		fill="gray">Easy-peasy</text>
+			<svg width="250" height="50">	
+				<circle cx="25" cy="25" r="20" fill="rgba(128, 0, 128, 1.0)"/>
+				<circle cx="50" cy="25" r="20" fill="rgba(0, 0, 255, 0.75)"/>
+				<circle cx="75" cy="25" r="20" fill="rgba(0, 255, 0, 0.5)"/>
+				<circle cx="100" cy="25" r="20" fill="rgba(255, 255, 0, 0.25)"/>
+				<circle cx="125" cy="25" r="20" fill="rgba(255, 0, 0, 0.1)"/>
+			</svg>
+			<svg>
+				<circle cx="25" cy="25" r="20" fill="rgba(128, 0, 128, 0.75)"
+					stroke="rgba(0, 255, 0, 0.25)" stroke-width="10"/>
+				<circle cx="65" cy="25" r="20" fill="rgba(128, 0, 128, 0.75)"
+						stroke="rgba(0, 255, 0, 0.25)" stroke-width="10" opacity="0.5"/>
+<circle cx="105" cy="25" r="20" fill="rgba(128, 0, 128, 0.75)"
+stroke="rgba(0, 255, 0, 0.25)" stroke-width="10" opacity="0.2"/>
+</svg>
+		
+<script type="text/javascript">
+	
+	var dataset; //Declare global var
+	var dataset2 = [ 25, 7, 5, 26, 11, 8, 25, 14, 23, 19,
+14, 11, 22, 29, 11, 13, 12, 17, 18, 10,
+24, 18, 25, 9, 3 ];
+	d3.csv("food.csv", function(data) {
+		//Hand CSV data off to global var,
+		//so it's accessible later.
+		dataset = data;
+		
+		d3.select("body").selectAll("p")
+		.data(dataset2)
+		.enter()
+		.append("p")
+		.text(function(d) { return d; })
+				.style("color", function(d) {
+					if (d > 15) {	//Threshold of 15
+						return "red";
+					} else {
+						return "black";
+					}
+				});
+		
+		//Call some other functions that
+		//generate your visualization, e.g.:
+		
+		generateVisualization();
+		//makeAwesomeCharts();
+		//makeEvenAwesomerCharts();
+		//thankAwardsCommittee();
+	});
+	
+	function generateVisualization() {
+	d3.select("body").selectAll("div")
+    .data(dataset2)
+    .enter()
+    .append("div")
+    .attr("class", "bar")
+	.style("height", function(d) {
+		var barHeight = d * 5; //Scale up by factor of 5
+        return barHeight + "px";
+	});
+	}
+</script>
+</body>
+</html>

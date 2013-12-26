@@ -1,0 +1,18 @@
+IBM
+GE
+Hewlett-Packard
+Oracle
+Accenture
+Microsoft
+Deloitte
+Alcatel-Lucent
+Cisco
+EY
+Dell
+SAP
+Bank of America
+Infosys
+Wipro
+Lockheed Martin
+McKinsey & Company
+Goldman Sachs

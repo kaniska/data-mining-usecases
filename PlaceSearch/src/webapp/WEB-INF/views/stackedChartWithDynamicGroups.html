@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?1.29.1"></script>
+    <style type="text/css">
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.x.axis path {
+  display: none;
+}
+
+
+
+.stations, .stations svg {
+  position: absolute;
+}
+
+.stations svg {
+  width: 60px;
+  height: 20px;
+  padding-right: 100px;
+  font: 10px sans-serif;
+}
+
+.stations circle {
+  fill: brown;
+  stroke: black;
+  stroke-width: 1.5px;
+}
+	
+		rect:hover {
+				fill: orange;
+			}
+			
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 16px;
+				line-height: 20px;
+			}
+			
+	#container
+      {
+        position: relative;
+      }
+    #chart
+      {
+        width: 20%;
+      }
+
+      #map
+      {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        width: 50%;
+		 margin: 10;
+		  padding: 10; 
+      }
+		  
+    </style>
+  </head>
+  <body>
+   <div id="container">
+        <div id="tooltip" class="hidden">	
+			<p><span id="value">100</span></p>
+		</div>
+		<div id="chart"></div>
+		<div id="map"></div>
+	</div>	
+		
+  <script type="text/javascript">
+  
+			//Width and height
+			var margin = { top: 20, right: 20, bottom: 30, left: 30 },
+			width = 400 - margin.left - margin.right,
+			height = 500 - margin.top - margin.bottom;
+			
+           var placeinfo1 = 
+		   [{"place_name":"El Camino", "category" : "hospital", "rating":3, "lat":-120.12, "long":36.98},
+			{"place_name":"PAMF", "category" : "hospital", "rating":4, "lat":-120.12, "long":35.98 },
+			{"place_name":"Kaiser", "category" : "hospital", "rating":7, "lat":-120.12, "long":35.98},
+			{"place_name":"Santa Clara Medical Center", "category" : "hospital", "rating":5, "lat":-120.12, "long":35.98},
+			{"place_name":"Sunnyvale Health Care", "category" : "hospital", "rating":1, "lat":-120.12, "long":35},			
+            {"place_name":"India Cash n Carry", "category" : "grocery",  "rating":8,"lat":-121.60, "long":38.70}];	
+			
+		var x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+		
+		var y = d3.scale.linear().range([height, 0]);
+		
+		var color = d3.scale.ordinal().range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);		
+		
+		var xAxis = d3.svg.axis()
+			.scale(x)
+			.orient("bottom");		
+			
+		var yAxis = d3.svg.axis()
+			.scale(y)
+			.orient("left");	
+			
+			//Create SVG element
+		var svg = d3.select("#chart")
+						.append("svg")
+						.attr("width", width + margin.left + margin.right)
+						.attr("height", height + margin.top + margin.bottom)
+						.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		
+		 
+
+		var colordomain_data = [];
+		placeinfo1.forEach(function (d) {
+			var y0 = 0;
+			d.placedata = [];
+			
+			 colordomain_data.push(d.place_name);
+			d.placedata.push({ name: d.place_name, value: d.rating, longitude: d.long, latitude: d.lat, y0: y0, y1: y0 += +d.rating});
+			d.total = d.placedata[d.placedata.length - 1].y1;
+			
+			// alert(JSON.stringify(d.placedata));
+		});	
+
+		//color.domain(colordomain_data);		
+			
+		placeinfo1.sort(function(a, b) { return b.total - a.total; });		
+        
+		x.domain(placeinfo1.map(function (d) { return d.category ; }));		
+		y.domain([0, d3.max(placeinfo1, function (d) { return d.total; })]);
+		
+// The axis 
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0.5)
+    .attr("dy", ".70em")
+    .style("text-anchor", "end")
+    .text("Rating");
+	
+	var groups = svg.selectAll(".groups")
+    .data(placeinfo1)
+    .enter().append("g")
+    .attr("class", "g")
+    .attr("transform", function (d) { return "translate(" + x(d.category) + ",0)"; });
+	//var i = 1;
+			//Create bars
+			groups.selectAll("rect")
+			   .data(function (d) { 
+			   console.log(JSON.stringify(d.placedata)); 
+			           return d.placedata; })
+			   .enter()
+			   .append("rect")
+			   .attr("width", 
+			       x.rangeBand())
+				.attr("y", function (d) { 				    			  
+				  return y(d.y1); })
+				.attr("height", function(d) { return y(d.y0) - y(d.y1); })
+				.style("fill", function(d) { return color(d.name); })
+				.on("mouseover", function(d) {
+					//Get this bar's x/y values, then augment for the tooltip
+					var xPosition = parseFloat(d3.select(this).attr("x")) + x.rangeBand() / 2;
+					var yPosition = parseFloat(d3.select(this).attr("y")) / 2 + height / 2;
+
+					//Update the tooltip position and value
+					d3.select("#tooltip")
+						.style("left", xPosition + "px")
+						.style("top", yPosition + "px")						
+						.select("#value")
+						.text(d.name + ", " +d.value);			   
+					//Show the tooltip
+					d3.select("#tooltip").classed("hidden", false);
+			     })
+			   .on("mouseout", function() {			   
+					//Hide the tooltip
+					d3.select("#tooltip").classed("hidden", true);					
+			   })
+			   .on("click", function(d) {
+			   		//sortBars();
+					var data = "{"+"\""+d.name+"\""+":["+d.longitude+","+d.latitude+"]}";
+					var data1 = "["+"\""+d.name+"\""+","+d.longitude+","+d.latitude+"]";
+					
+					console.log(data1);
+					showMap((JSON.parse(data1)));
+			   })
+			
+		</script> 
+		
+		<script>
+function showMap(mapdata) {
+var map = new google.maps.Map(d3.select("#map").node(), {
+  zoom: 15,
+  center: new google.maps.LatLng(mapdata[1], mapdata[2]),
+  mapTypeId: google.maps.MapTypeId.TERRAIN
+});
+
+// Load the station data. When the data comes back, create an overlay.
+//d3.json("stations.json", function(data) {
+  var overlay = new google.maps.OverlayView();
+
+  // Add the container when the overlay is added to the map.
+  overlay.onAdd = function() {
+    var layer = d3.select(this.getPanes().overlayLayer).append("div")
+        .attr("class", "stations");
+
+    // Draw each marker as a separate SVG element.
+    // We could use a single SVG, but what size would it have?
+    overlay.draw = function() {
+      var projection = this.getProjection(),
+          padding = 10;
+
+      var marker = layer.selectAll("svg")
+          .data(d3.entries(mapdata))
+          .each(transform) // update existing markers
+        .enter().append("svg:svg")
+          .each(transform)
+          .attr("class", "marker");
+
+      // Add a circle.
+      marker.append("svg:circle")
+          .attr("r", 4.5)
+          .attr("cx", padding)
+          .attr("cy", padding);
+
+
+      // Add a label.
+      marker.append("svg:text")
+          .attr("x", padding + 7)
+          .attr("y", padding)
+          .attr("dy", ".31em")
+          .text(function(d) { return mapdata[0]; });
+
+      function transform(d) {
+	 // alert(d.value[0] +", "+ d.value[1]);
+        d = new google.maps.LatLng(mapdata[1], mapdata[2]);
+        d = projection.fromLatLngToDivPixel(d);
+        return d3.select(this)
+            .style("left", (d.x - padding) + "px")
+            .style("top", (d.y - padding) + "px");
+      }
+    };
+  };
+
+  // Bind our overlay to the map…
+  overlay.setMap(map);
+//});
+
+		}
+		</script>
+  </body>
+</html>

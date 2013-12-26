@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="LinkedinSearch" default="help">
+
+	<property file="build.properties" />
+
+	<path id="classpath.src">
+		<pathelement location="${classes.dir}" />
+	</path>
+
+	<path id="classpath.test">
+		<pathelement location="${test.classes.dir}" />
+	</path>
+
+	<path id="jars.build">
+		<fileset dir="${thirdparty.libs}">
+			<include name="**/commons-cli-1.1.jar" />
+			<include name="**/linkedin-j.jar" />
+			<include name="**/signpost-core-1.2.1.2.jar" />
+			<include name="**/commons-codec-1.3.jar" />
+			<include name="**/jaxb-api.jar" />
+			<include name="**/jaxb-impl.jar" />
+			<include name="**/jaxb1-impl.jar" />
+			<include name="**/jsr173_1.0_api.jar" />
+			<include name="**/hadoop-annotations-2.0.0-cdh4.3.0.jar" />
+			<include name="**/hadoop-common-2.0.0-cdh4.3.0.jar" />
+			<include name="**/hadoop-core-2.0.0-mr1-cdh4.3.0.jar" />		
+		</fileset>		
+	</path>
+
+	<path id="jars.test">
+		<fileset dir="${thirdparty.libs}/test" includes="**/*.jar" />
+	</path>
+
+	<target name="all" description="Clean work dirs, then compile, run the test cases and then create a JAR">
+		<antcall target="test" />
+		<antcall target="package" />
+	</target>
+
+	<target name="clean">
+		<echo>Cleaning the previous files</echo>
+		<delete verbose="true" dir="${classes.dir}" />
+		<delete verbose="true" dir="${test.classes.dir}" />
+		<delete verbose="true" dir="${dist.dir}" />
+	</target>
+
+	<target name="compile" depends="clean">
+		<echo>Compiling the source code</echo>
+		<mkdir dir="${classes.dir}" />
+		<javac destdir="${classes.dir}" debug="true" srcdir="src" includeantruntime="false">
+			<classpath refid="jars.build" />
+		</javac>
+	</target>
+
+	<target name="compile-test" depends="compile">
+		<mkdir dir="${test.classes.dir}" />
+		<javac srcdir="test" destdir="${test.classes.dir}" debug="true" includeantruntime="false">
+			<classpath refid="classpath.src" />
+			<classpath refid="jars.build" />
+			<classpath refid="jars.test" />
+		</javac>
+	</target>
+
+	<target name="help">
+		<echo>You can use the following targets:</echo>
+		<echo>
+		</echo>
+		<echo>  help    : (default) Prints this message </echo>
+		<echo>  all     : Cleans and compiles the application and then run the unit tests</echo>
+		<echo>  clean   : Deletes work directories</echo>
+		<echo>  compile : Compiles servlets into class files</echo>
+		<echo>  test    : Executes test cases</echo>
+		<echo>  package : Creates a deployment jar</echo>
+		<echo>
+		</echo>
+	</target>
+
+	<target name="package" depends="clean,compile,test">
+		<echo>Packaging the JAR</echo>
+		<mkdir dir="${dist.dir}" />
+		<jar destfile="${dist.dir}/${ant.project.name}.jar" basedir="${classes.dir}" />
+	</target>
+
+	<target name="test" depends="compile-test">
+		<echo>Running the test cases</echo>
+		<mkdir dir="${test.data.dir}" />
+		<mkdir dir="${test.reports.dir}" />
+		<junit fork="on" haltonfailure="no" printsummary="on" showoutput="off" failureproperty="junit.failure">
+			<classpath refid="classpath.test" />
+			<classpath refid="classpath.src" />
+			<classpath refid="jars.build" />
+			<classpath refid="jars.test" />
+			<batchtest fork="yes" todir="${test.data.dir}">
+				<formatter type="xml" />
+				<fileset dir="test">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+			<formatter type="plain" usefile="false" />
+		</junit>
+
+		<junitreport todir="${test.reports.dir}">
+			<fileset dir="${test.data.dir}">
+				<include name="TEST-*.xml" />
+			</fileset>
+		</junitreport>
+
+		<fail message="At least one test case failed - Build failed" status="2">
+			<condition>
+				<isset property="junit.failure" />
+			</condition>
+		</fail>
+	</target>
+
+</project>

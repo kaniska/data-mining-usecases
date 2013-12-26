@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?1.29.1"></script>
+    <style type="text/css">
+
+		rect:hover {
+				fill: orange;
+			}
+			
+			#tooltip {
+				position: absolute;
+				width: 200px;
+				height: auto;
+				padding: 10px;
+				background-color: white;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+				pointer-events: none;
+			}
+			
+			#tooltip.hidden {
+				display: none;
+			}
+			
+			#tooltip p {
+				margin: 0;
+				font-family: sans-serif;
+				font-size: 16px;
+				line-height: 20px;
+			}
+
+    </style>
+  </head>
+  <body>
+  <div id="tooltip" class="hidden">	
+			<p><span id="value">100</span></p>
+		</div>
+  <script type="text/javascript">
+
+var color = d3.scale.ordinal()
+    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+  
+			//Width and height
+			//var w = 600;
+			//var h = 250;
+			var margin = { top: 20, right: 20, bottom: 30, left: 40 },
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+			
+			var placeinfo = {"hospital" : {"El Camino":[2,-120.12,36.98],
+			"PAMF":[5,-120.12,34.98]},"grocery_or_supermarket" : {"India  Cash n Carry":[10,-120.12,35.02]}};
+			
+           var placeinfo1 = 
+		   [{"place_name":"El Camino", "category" : "hospital", "rating":3, "lat":-120.12, "long":36.98},
+			{"place_name":"PAMF", "category" : "hospital", "rating":4, "lat":-120.12, "long":35.98 },
+			{"place_name":"Kaiser", "category" : "hospital", "rating":5, "lat":-120.12, "long":35.98},
+			{"place_name":"Santa Clara Medical Center", "category" : "hospital", "rating":2, "lat":-120.12, "long":35.98},
+			{"place_name":"Sunnyvale Health Care", "category" : "hospital", "rating":1, "lat":-120.12, "long":35},			
+            {"place_name":"India Cash n Carry", "category" : "grocery",  "rating":8,"lat":-120.12, "long":34.98}];	
+
+var placeinfo2 = 
+		   [{"El Camino":2, "category" : "hospital", "lat":-120.12, "long":36.98},
+			{"PAMF":2, "category" : "hospital", "lat":-120.12, "long":35.98 },
+            {"India Cash n Carry":8, "category" : "grocery", "lat":-120.12, "long":34.98}];				
+			
+var nested_data = d3.nest()
+.key(function(d) { return d.category; })
+.map(placeinfo1, d3.map);
+
+var seriesNames = [];
+placeinfo1.forEach(function (d) {
+var keys = Object.keys(d);	
+  keys.forEach(function (key) {
+    if((key !== "category") && (key !== "lat") && (key !== "long")) {	 
+	   if(seriesNames.indexOf(key) < 0) {
+           seriesNames.push(key);	  
+       }		
+     }
+   });
+});
+
+//var seriesNames = d3.keys(placeinfo1[2]).filter(function (key) { return (key !== //"rating") && (key !== "category") && (key !== "lat") && (key !== "long"); });
+
+//alert(JSON.stringify(seriesNames));	
+//var counter = 1;
+placeinfo1.forEach(function (d) {
+    d.placedata = [];
+	 //alert(name + " : " +d.place_name);
+	d.placedata.push({ name: d.place_name, value: d.rating});
+	//d.placedata.push({ name: 'rating', value: d.rating, pos: counter });
+	//counter = counter + 1;
+	//seriesNames.map(function (name) {
+        //alert(name + " : " +d[name]);
+     	//return { name: name, value: +d[name] }; });
+				
+	//d.placedata.forEach(function (child) { 
+	  //alert("hi --- " + JSON.stringify(d.placedata));
+	  //if(child[name] == null) { 
+	   //delete d.placedata[name];
+	 // }
+	//});    
+	//alert("hi --- " + JSON.stringify(d.placedata));
+});
+
+
+			   
+			//var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
+
+		var x0 = d3.scale.ordinal().rangeRoundBands([0, width], .1);
+		var x1 = d3.scale.ordinal();
+		var y = d3.scale.linear().range([height, 0]);
+		var xAxis = d3.svg.axis()
+			.scale(x0)
+			.orient("bottom");		
+		var yAxis = d3.svg.axis()
+			.scale(y)
+			.orient("left");	
+			
+			//Create SVG element
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", width + margin.left + margin.right)
+						.attr("height", height + margin.top + margin.bottom)
+						.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+		x0.domain(placeinfo1.map(function (d) { return d.category ; }));
+		x1.domain(seriesNames).rangeRoundBands([0, x0.rangeBand()]);
+		y.domain([0, (10 + d3.max(placeinfo1, 
+		function (d) 
+		  { return d3.max(d.placedata, 
+		       function (d) { return d.value; }); }))]);				
+						
+// The axis 
+svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Rating");
+	
+	var groups = svg.selectAll(".groups")
+    .data(placeinfo1)
+.enter().append("g")
+    .attr("class", "g")
+    .attr("transform", function (d) { return "translate(" + x0(d.category) + ",0)"; });
+	//var i = 1;
+			//Create bars
+			groups.selectAll("rect")
+			   .data(function (d) { 
+			   console.log(JSON.stringify(d.placedata)); 
+			           return d.placedata; })
+			   .enter()
+			   .append("rect")
+			   .attr("width", 
+			       x1.rangeBand())
+				.attr("x", function (d) { 				  
+				   return x1(d.name); })
+				.attr("y", function (d) { 				    			  
+				  return y(d.value); })
+				.attr("height", function (d) { 				  
+				    return height - y(d.value); })
+			   .attr("fill", function(d) {
+			  // i=i+1;
+			  // console.log(i);
+			  return color(d.name);
+				//	return "rgb(0, "+i*10+"," + (i * 20) + ")";
+			   })
+			   .on("mouseover", function(d) {
+			   
+			  // console.log(JSON.stringify(d));
+
+					//Get this bar's x/y values, then augment for the tooltip
+					var xPosition = parseFloat(d3.select(this).attr("x")) + x1.rangeBand() / 2;
+					var yPosition = parseFloat(d3.select(this).attr("y")) / 2 + height / 2;
+
+					//Update the tooltip position and value
+					d3.select("#tooltip")
+						.style("left", xPosition + "px")
+						.style("top", yPosition + "px")						
+						.select("#value")
+						.text(d.name + ", " +d.value);
+			   
+					//Show the tooltip
+					d3.select("#tooltip").classed("hidden", false);
+
+			     })
+			   .on("mouseout", function() {
+			   
+					//Hide the tooltip
+					d3.select("#tooltip").classed("hidden", true);
+					
+			   })
+			   .on("click", function() {
+			   		//sortBars();
+			   });
+
+			//Define sort order flag
+			var sortOrder = false;
+			
+			
+			
+		</script>
+ 
+  </body>
+</html>
