@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.mining.linkedin;
+package com.mining.facebook;
 
 import java.io.IOException;
 import java.util.HashMap;
