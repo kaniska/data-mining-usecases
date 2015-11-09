@@ -21,22 +21,13 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import com.google.code.linkedinapi.client.CompaniesApiClient;
-import com.google.code.linkedinapi.client.LinkedInApiClient;
-import com.google.code.linkedinapi.client.LinkedInApiClientFactory;
-import com.google.code.linkedinapi.client.LinkedInAuthenticationClient;
-import com.google.code.linkedinapi.schema.Product;
-import com.google.code.linkedinapi.schema.SchemaEntity;
-import com.mining.linkedin.LinkedinCrawler;
-import com.mining.linkedin.LinkedinSearch;
-
 /**
  * @author Kaniska_Mandal
  *
  */
-public class LinkedinCrawler extends Configured implements Tool {
+public class FaceBookSearch extends Configured implements Tool {
 
-	public static class LinkedinDataMapper extends
+	public static class FacebookDataMapper extends
 			Mapper<LongWritable, Text, Text, Text> {
 		
 		private static final int DEF_MAX_QUERY_SIZE = 1000;
@@ -156,14 +147,14 @@ public class LinkedinCrawler extends Configured implements Tool {
 		DistributedCache.addArchiveToClassPath(new Path("/cache/activation.jar"), getConf());
 		
 		Job job = new Job(getConf(), "facebook crawler");
-		job.setJarByClass(LinkedinDataMapper.class);
+		job.setJarByClass(FacebookMapper.class);
 
 		// the keys are words (strings)
 		job.setOutputKeyClass(Text.class);
 		// the values are counts (ints)
 		job.setOutputValueClass(Text.class);
 		job.setOutputFormatClass(TextOutputFormat.class);
-		job.setMapperClass(LinkedinDataMapper.class);
+		job.setMapperClass(FacebookMapper.class);
 
 		FileInputFormat.setInputPaths(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -173,24 +164,11 @@ public class LinkedinCrawler extends Configured implements Tool {
 	}
 
 	public static void main(String[] args) throws Exception {
-		int res = ToolRunner.run(new Configuration(), new LinkedinCrawler(),
+		int res = ToolRunner.run(new Configuration(), new FaceBookSearch(),
 				args);
 		System.exit(res);
 	}
 	
 	
-	private static boolean valueMissing(String value){
-		if (value == null || value.isEmpty()){
-			return true;
-		}
-		return false;
-	}
-	
-	
-	private static Object connectToLinkedin(String consumerKey, String consumerSecret,
-			String accessToken, String accessTokenSecret){
-		
-		return null;
-	}
 
 }
