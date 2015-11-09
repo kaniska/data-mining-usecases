@@ -54,7 +54,7 @@ public class LinkedinCrawler extends Configured implements Tool {
 			// assume that the input is a series of simple queries using the Twitter query format
 			String query = new String(value.getBytes(), 0, value.getLength());
 						
-			context.getCounter("ZettaVox", "ZettaVox Linkedin Crawler").increment(1);
+			context.getCounter("MyCrawler", "Linkedin Crawler").increment(1);
 			try {
 				//System.out.println("### Input data .. "+query);
 				
